@@ -1,0 +1,36 @@
+{
+  "name": "browserify-plus",
+  "version": "1.0.0",
+  "description": "'browserift plus to solving modular development'",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "browserify": "^11.2.0",
+    "iconv-lite": "^0.4.13",
+    "uglify-js": "^2.4.24"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node index.js"
+  },
+  "bin":{
+    "browserify-plus":"./bin/build.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/edifier/browserify-plus.git"
+  },
+  "keywords": [
+    "browserify",
+    "uglifyjs",
+    "plus"
+  ],
+  "author": "edifier",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/edifier/browserify-plus/issues"
+  },
+  "homepage": "https://github.com/edifier/browserify-plus#readme"
+}
