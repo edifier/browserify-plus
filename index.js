@@ -14,9 +14,9 @@ Object.prototype.extendDeep = function (parent) {
         if (parent.hasOwnProperty(i)) {
             if (typeof parent[i] === "object") {
                 child[i] = (toStr.call(parent[i]) === astr) ? [] : {};
-                extendDeep(parent[i], child[i]);
+                child[i].extendDeep(parent[i]);
             } else {
-                parent[i] && (child[i] = parent[i]);
+                child[i] = parent[i];
             }
         }
     }
@@ -29,12 +29,22 @@ Object.prototype.getLength = function () {
     return i;
 };
 
-handle(extendDeep.call({
-    inputPath: './test/src',
-    output: {
-        path: './js/',
-        type: 'normal',   //normal、deep
-        compress:false
-    },
-    libraryPath: './core/'
-}, {}));
+module.exports = function () {
+
+    var config = extendDeep.call({
+        //需要编译的文件夹
+        inputPath: './example/src',
+        output: {
+            //输出文件路径
+            path: './js/',
+            //输出方式: normal、deep
+            type: 'normal',
+            //是否压缩
+            compress: true
+        },
+        //引用的库文件路径
+        libraryPath: './core/'
+    }, arguments[0]);
+
+    handle(config);
+};
