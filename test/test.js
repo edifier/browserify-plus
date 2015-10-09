@@ -8,7 +8,7 @@ var browserifyPlus = require('../index.js');
 
 browserifyPlus({
     //需要编译的文件夹
-    inputPath: '../src',
+    inputPath: '../src/',
     output: {
         //输出文件路径
         path: '../js/',
