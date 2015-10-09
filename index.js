@@ -33,12 +33,12 @@ module.exports = function () {
 
     var config = extendDeep.call({
         //需要编译的文件夹
-        inputPath: './example/src',
+        inputPath: '',
         output: {
             //输出文件路径
-            path: './js/',
+            path: '',
             //输出方式: normal、deep
-            type: 'normal',
+            type: '',
             //是否压缩
             compress: true
         },

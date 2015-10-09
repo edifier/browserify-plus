@@ -15,9 +15,6 @@
   "scripts": {
     "test": "node index.js"
   },
-  "bin":{
-    "browserify-plus":"./bin/build.js"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/edifier/browserify-plus.git"
