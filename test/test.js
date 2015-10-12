@@ -18,7 +18,13 @@ var config = {
         compress: true
     },
     //引用的库文件路径
-    libraryPath: '../core/'
+    libraryPath: '../core/',
+    watch: {
+        //watch轮询的时常，默认值1200
+        interval: 1000
+    }
 };
 
 browserifyPlus(config);
+
+
