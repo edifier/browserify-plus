@@ -3,18 +3,18 @@
  */
 
 'use strict';
-var handle = require('./lib/main.js');
+var browserifyPlus = require('./lib/main.js');
 
-Object.prototype.extendDeep = function (parent) {
+function extendDeep(parent) {
     var i,
         toStr = Object.prototype.toString,
         astr = "[object Array]",
-        child = this || {};
+        child = arguments[1] || {};
     for (i in parent) {
         if (parent.hasOwnProperty(i)) {
             if (typeof parent[i] === "object") {
                 child[i] = (toStr.call(parent[i]) === astr) ? [] : {};
-                child[i].extendDeep(parent[i]);
+                extendDeep(parent[i],child[i]);
             } else {
                 child[i] = parent[i];
             }
@@ -23,15 +23,9 @@ Object.prototype.extendDeep = function (parent) {
     return child;
 };
 
-Object.prototype.getLength = function () {
-    var i = 0, o = this;
-    for (var j in o) (o.hasOwnProperty(j) && o[j]) && i++;
-    return i;
-};
-
 module.exports = function () {
 
-    var config = extendDeep.call({
+    var config = extendDeep(arguments[0],{
         //需要编译的文件夹
         inputPath: '',
         output: {
@@ -44,7 +38,7 @@ module.exports = function () {
         },
         //引用的库文件路径
         libraryPath: './core/'
-    }, arguments[0]);
+    });
 
-    handle(config);
+    browserifyPlus(config);
 };
