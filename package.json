@@ -1,6 +1,6 @@
 {
   "name": "browserify-plus",
-  "version": "0.1.1",
+  "version": "0.1.0",
   "description": "'browserift plus to solving modular development'",
   "main": "index.js",
   "directories": {
