@@ -2,7 +2,7 @@
 
 ## Installation	
 
-	npm install browserify-plus	
+	npm install browserify-plus
 
 ## Explain
 
