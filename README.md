@@ -48,7 +48,7 @@
     };
     browserifyPlus(config);
     
-~~~ javascript
+~~~
 
 ~~~ javascript
 	
@@ -57,7 +57,7 @@
 	var nameSpace = require('<%bsp:nameSpace%>');
 	console.log(nameSpace);
 	
-~~~ javascript
+~~~
 
 ## Github
 
