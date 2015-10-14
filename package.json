@@ -24,7 +24,7 @@
   "keywords": [
     "browserify",
     "uglifyjs",
-    "plus", 
+    "plus",
     "watch",
     "iconv-lite"
   ],

@@ -10,6 +10,8 @@ var config = {
     //需要编译的文件夹
     inputPath: './src/',
     output: {
+        //输出banner
+        banner:'/*build by wangxin at ' + new Date() + '*/\n',
         //输出文件路径
         path: '../js/',
         //输出方式: normal、deep
