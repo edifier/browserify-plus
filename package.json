@@ -1,6 +1,6 @@
 {
   "name": "browserify-plus",
-  "version": "1.0.0",
+  "version": "1.3.0",
   "description": "'browserift plus to solving modular development'",
   "main": "index.js",
   "directories": {
@@ -15,7 +15,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "node index.js"
+    "test": "node ./test/test.js"
   },
   "repository": {
     "type": "git",
@@ -24,7 +24,9 @@
   "keywords": [
     "browserify",
     "uglifyjs",
-    "plus"
+    "plus", 
+    "watch",
+    "iconv-lite"
   ],
   "author": "edifier",
   "license": "MIT",
