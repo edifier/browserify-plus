@@ -10,7 +10,7 @@
 	
 	进行browserify编译(支持短命名方式引用模块)，并同步文件修改(删除文件、增加文件、修改文件)
 
-	*/browserify-plus/ 执行 npm test，在*/browserify-plus/js/文件内查看编译后的代码
+	在*/browserify-plus/执行:npm test，*/browserify-plus/js/文件内查看编译后的代码
 
 ## Options
 
@@ -37,7 +37,7 @@
         inputPath: './test/src/',
         output: {
         	//输出文件banner
-        	banner:'text',
+        	banner:'/*build at <%time%>*/\n',
             //输出文件路径
             path: './js/',
             //输出方式: normal、deep
