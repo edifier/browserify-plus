@@ -3,10 +3,9 @@
  */
 
 // 这是一段中文测试
-var nameSpace = require('<%bsp:nameSpace%>');
-var copy = require('<%bsp:copy%>');
+var clear = require('<%bsp:clear%>');
 var PATH = require('path');
 
 
-console.log(nameSpace);
-console.log(copy);
+console.log(clear([1,null,'']));
+console.log(PATH);
