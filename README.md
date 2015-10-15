@@ -13,7 +13,7 @@
 ## Options
 
 	* `inputPath` -- 需要进行编译的文件夹名称
-	* `output.banner` -- 输出文件banner
+	* `output.banner` -- 输出文件banner ==> <%time%>:修改时间
 	* `output.path` -- 输出文件的路径
 	* `output.type` -- 输出方式
 		

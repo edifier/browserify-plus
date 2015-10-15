@@ -11,7 +11,7 @@ var config = {
     inputPath: './src/',
     output: {
         //输出banner
-        banner:'/*build by wangxin at ' + new Date() + '*/\n',
+        banner:'/*build by wangxin at <%time%>*/\n',
         //输出文件路径
         path: '../js/',
         //输出方式: normal、deep
