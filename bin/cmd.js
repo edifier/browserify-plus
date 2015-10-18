@@ -15,7 +15,14 @@ function forEach(handle) {
 
 function getFilePath(filePath, file, that) {
     forEach.call(fs.readdirSync(filePath), function (fileName) {
-        var baseDir = filePath + fileName, lstat = fs.lstatSync(baseDir);
+        var baseDir = filePath + fileName;
+        try {
+            var lstat = fs.lstatSync(baseDir);
+        } catch (e) {
+            trace.error('file parsing error, replace the execution path.');
+            process.exit(1);
+            return false;
+        }
         if (lstat.isDirectory()) {
             if (PATH.basename(baseDir).replace(/\..+$/, '') == '')return;
             getFilePath(baseDir + PATH.sep, file, that);
@@ -28,9 +35,7 @@ function getFilePath(filePath, file, that) {
 }
 
 function relativePath(basePath, outPath) {
-
     var symbol = PATH.sep, dirArr = outPath.split(symbol), $p;
-
     switch (dirArr[0]) {
         case '.':
             $p = PATH.join(basePath, outPath);
@@ -62,7 +67,7 @@ if (/(v|version)/i.test(args)) {
 }
 
 if (args && !/.+\.bsp\.js$/.test(args)) {
-    return trace.warn('browserify-plus : config file named *.bsp.js');
+    return trace.warn('configuration file named *.bsp.js');
 }
 
 var fileMap = args ? {path: relativePath(process.cwd(), args)} : getFilePath(process.cwd() + PATH.sep, 'config.bsp.js', {});
@@ -82,5 +87,5 @@ if (fileMap && fileMap.path) {
 
     browserifyPlus(config);
 } else {
-    return trace.error('has no config file , please edit it again');
+    return trace.error('no configuration file, please edit it');
 }
