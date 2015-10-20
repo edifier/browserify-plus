@@ -2,7 +2,7 @@
 
 ## Installation	
 
-	npm install browserify-plus
+	npm install browserify-plus [-g]
 
 ## Explain
 	
@@ -11,6 +11,8 @@
 	进行browserify编译(支持短命名方式引用模块)，并同步文件修改(删除文件、增加文件、修改文件)
 
 	在*/browserify-plus/执行:npm test，*/browserify-plus/js/文件内查看编译后的代码
+	
+	增加-g参数以后，按照./test/config.bsp.js建立同名文件，全局执行browserify-plus命令
 
 ## Options
 

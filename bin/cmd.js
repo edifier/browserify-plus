@@ -19,9 +19,9 @@ function getFilePath(filePath, file, that) {
         try {
             var lstat = fs.lstatSync(baseDir);
         } catch (e) {
-            trace.error('file parsing error, replace the execution path.');
-            process.exit(1);
-            return false;
+            trace.error('Skip a file parsing error.');
+            //process.exit(1);
+            return;
         }
         if (lstat.isDirectory()) {
             if (PATH.basename(baseDir).replace(/\..+$/, '') == '')return;
