@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 
+/*
+ * Created by wangxin on 15/10/10.
+ */
+
 'use strict';
 var fs = require('fs');
 var PATH = require('path');
