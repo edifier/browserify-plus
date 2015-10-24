@@ -46,7 +46,13 @@ function extendDeep(parent) {
  */
 function getLength() {
     var i = 0, o = arguments[0];
-    for (var j in o) (o.hasOwnProperty(j) && o[j]) && i++;
+    for (var j in o) {
+        if (typeof o[j] === 'object') {
+            i += getLength(o[j]);
+        } else {
+            (o.hasOwnProperty(j) && o[j]) && i++;
+        }
+    }
     return i;
 }
 
@@ -90,12 +96,15 @@ function doBrowserify(basePath, charset, config, index, cb) {
     var b = new browserify();
     b.add(basePath);
     b.bundle(function (err, code) {
+
+        //获取到文件内容后就删除过度文件
+        fs.unlinkSync(basePath);
+
         if (err) {
             trace.error(err);
-            fs.unlinkSync(basePath);
         } else {
             //browserify编译完成，开始输出
-            outputHandle(code, basePath, charset, config, PATH.sep, 'js');
+            outputHandle(iconv.decode(code, charset), basePath, config, 'rjs');
             cb && cb(index + 1);
         }
     });
@@ -114,12 +123,12 @@ function doReplace(rjsMap, libraryMap, opt, cb) {
         if (arr[i]) {
             var path = arr[i], rjsPath = PATH.resolve(rjsMap[path]);
 
-            var con = fs.readFileSync(rjsMap[path]);
+            var con = fs.readFileSync(rjsMap[path]), charset;
             //这里不建议用gbk编码格式
             if (iconv.decode(con, 'gbk').indexOf('�') != -1) {
-                var charset = 'utf8';
+                charset = 'utf8';
             } else {
-                var charset = 'gbk';
+                charset = 'gbk';
             }
 
             var content = iconv.decode(con, charset);
@@ -157,6 +166,27 @@ function doReplace(rjsMap, libraryMap, opt, cb) {
 
 /*
  * @author wangxin
+ * css压缩
+ * opts: 输出路径：文件路径
+ * retrun；
+ */
+
+function cleanCSS(cssMap, opts) {
+    for (var i in cssMap) {
+        var con = fs.readFileSync(cssMap[i]), charset;
+        //这里不建议用gbk编码格式
+        if (iconv.decode(con, 'gbk').indexOf('�') != -1) {
+            charset = 'utf8';
+        } else {
+            charset = 'gbk';
+        }
+
+        outputHandle(iconv.decode(con, charset), cssMap[i], opts, 'css');
+    }
+}
+
+/*
+ * @author wangxin
  * 初始化方法
  * opts: 配置参数
  * 详情参考 ../test/test.js ==> config
@@ -165,30 +195,50 @@ module.exports = function (config) {
 
     var opts = extendDeep(config);
 
-    var fileMap = distrbute(opts), rjsMap = fileMap.rjs, cssMap = fileMap.css;
-
-    console.log(fileMap);
-
-    //处理js任务
-    if (getLength(rjsMap) !== 0) {
-        //获取库文件的映射列表
-        //object： fileName : filePath
-        var libraryMap = getLibraryMap(PATH.resolve(opts.rjs.libraryPath) + PATH.sep, {});
-
-        doReplace(rjsMap, libraryMap, opts, function () {
-
-            //针对CSS文件的处理在这里
-            //doCSS....
-
-            if (opts.watch) {
-                listener(opts, function (o) {
-                    if (typeof o == 'object') doReplace(o, libraryMap, opts);
-                });
-            } else {
-                trace.ok('the task is being performed, please wait.');
+    /*
+     * 文件路径的初始化
+     *
+     */
+    var fileMap = distrbute(opts),
+        rjsMap = fileMap.rjs,
+        cssMap = fileMap.css,
+        task_run = function () {
+            //对CSS文件的处理
+            if (cssMap) {
+                cleanCSS(cssMap, opts);
             }
-        });
+
+            //watch任务处理
+            if (opts.watch) {
+                listener(opts, function (o, extname) {
+                    switch (extname) {
+                        case 'rjs':
+                            doReplace(o, libraryMap, opts);
+                            break;
+                        case 'css':
+                            cleanCSS(o, opts);
+                            break;
+                        default :
+                            trace.warn('err file change');
+                    }
+                });
+            }
+        };
+
+    /*
+     * 因为rjs任务为异步操作
+     * 所以放在最先执行的位置上
+     */
+    if (getLength(fileMap) !== 0) {
+        if (getLength(rjsMap) !== 0) {
+            //获取库文件的映射列表
+            //object： fileName : filePath
+            var libraryMap = getLibraryMap(PATH.resolve(opts.rjs.libraryPath) + PATH.sep, {});
+            doReplace(rjsMap, libraryMap || {}, opts, task_run);
+        } else {
+            task_run();
+        }
     } else {
-        trace.warn('no rjs file , process end');
+        trace.warn('no file to be processed , process end');
     }
 };

@@ -23,21 +23,24 @@ var config = {
         //引用的库文件路径
         libraryPath: './core'
     },
-    css:{
-        output:{
-            //输出banner
-            banner: '/*build at <%time%>*/\n',
-            //输出文件路径
-            path: './css',
-            //是否压缩
-            compress: true
-        }
-    },
+    //css: {
+    //    output: {
+    //        //输出banner
+    //        banner: '/*build at <%time%>*/\n',
+    //        //输出文件路径
+    //        path: './css',
+    //        //输出方式: normal、deep
+    //        type: 'normal',
+    //        //是否压缩
+    //        compress: true
+    //    }
+    //},
+    //css:false,
     watch: {
         //watch轮询的时常，默认值1200
-        interval: 1000
+        interval: 800
     }
-    //watch:false
+    //watch: false
 };
 
 browserifyPlus(config);
