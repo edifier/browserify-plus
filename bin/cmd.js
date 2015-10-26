@@ -64,6 +64,24 @@ function relativePath(basePath, outPath) {
     return $p;
 }
 
+function extendDeep(parent,child,dirName) {
+    var i,
+        toStr = Object.prototype.toString,
+        astr = '[object Array]';
+    for (i in parent) {
+        if (parent.hasOwnProperty(i)) {
+            if (typeof parent[i] === "object") {
+                child[i] = (toStr.call(parent[i]) === astr) ? [] : {};
+                extendDeep(parent[i], child[i],dirName);
+            } else {
+                if (/path/gi.test(i) ) parent[i] = relativePath(dirName, parent[i]);
+                child[i] = parent[i];
+            }
+        }
+    }
+    return child;
+}
+
 var args = process.argv[2] ? process.argv[2].replace(/^\-/, '') : '';
 
 if (/(v|version)/i.test(args)) {
@@ -85,11 +103,7 @@ if (fileMap && fileMap.path) {
         process.exit(1);
     }
 
-    config.inputPath = relativePath(dirName, config.inputPath);
-    config.output.path = relativePath(dirName, config.output.path);
-    config.libraryPath = relativePath(dirName, config.libraryPath);
-
-    browserifyPlus(config);
+    browserifyPlus(extendDeep(config,{},dirName));
 } else {
     return trace.error('no configuration file, please edit it');
 }
