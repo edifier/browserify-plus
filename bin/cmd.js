@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
-/*
- * Created by wangxin on 15/10/10.
- */
-
 'use strict';
 var fs = require('fs');
 var PATH = require('path');
 var browserifyPlus = require('../index');
 var trace = require('../lib/trace');
 
+/*
+ * 替换forEach功能
+ * ES5的forEach不支持break
+ */
 function forEach(handle) {
     var arr = this, len = arr.length;
     for (var i = 0; i < len; i++) {
@@ -17,6 +17,10 @@ function forEach(handle) {
     }
 }
 
+/*
+ * 获取config.bsp.js文件路径
+ * return object: {path:.../config.bsp.js}
+ */
 function getFilePath(filePath, file, that) {
     forEach.call(fs.readdirSync(filePath), function (fileName) {
         var baseDir = filePath + fileName;
@@ -38,6 +42,11 @@ function getFilePath(filePath, file, that) {
     return that;
 }
 
+/*
+ * 获取文件路径方法
+ * basePath是A文件绝对路径，outPath是B相对A的相对路径
+ * return string: B的绝对路径
+ */
 function relativePath(basePath, outPath) {
     var symbol = PATH.sep, dirArr = outPath.split(symbol), $p;
     switch (dirArr[0]) {
@@ -64,6 +73,9 @@ function relativePath(basePath, outPath) {
     return $p;
 }
 
+/*
+ * 深度复制，按条件赋值
+ */
 function extendDeep(parent,child,dirName) {
     var i,
         toStr = Object.prototype.toString,
@@ -84,16 +96,17 @@ function extendDeep(parent,child,dirName) {
 
 var args = process.argv[2] ? process.argv[2].replace(/^\-/, '') : '';
 
+//获取包程序版本号
 if (/(v|version)/i.test(args)) {
     return trace.log(require('../package.json').version);
 }
 
+//配置文件当做参数传值的校验
 if (args && !/.+\.bsp\.js$/.test(args)) {
     return trace.warn('configuration file named *.bsp.js');
 }
 
 var fileMap = args ? {path: relativePath(process.cwd(), args)} : getFilePath(process.cwd() + PATH.sep, 'config.bsp.js', {});
-
 
 if (fileMap && fileMap.path) {
     try {
