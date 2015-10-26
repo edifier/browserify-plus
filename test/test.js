@@ -49,6 +49,12 @@ var config = {
             compress: true
         }
     },
+    image: {
+        //输出文件路径
+        outpath: './i/image',
+        compress: true,
+        patterns: ['.png', '.jpg', '.gif']
+    },
     //css:false,
     watch: {
         //watch轮询的时常，默认值1200

@@ -9,6 +9,7 @@ var PATH = require('path');
 var iconv = require('iconv-lite');
 
 var browserify = require('browserify');
+var Imagemin = require('imagemin');
 
 var distrbute = require('./lib/distrbute.js');
 var trace = require('./lib/trace.js');
@@ -148,10 +149,7 @@ function doReplace(rjsMap, libraryMap, opt, cb) {
 
             doBrowserify(path, charset, opt, i, replace);
         } else {
-            if (cb) {
-                trace.ok('RJS file processing tasks completed\n');
-                cb();
-            }
+            cb && cb();
         }
     };
 
@@ -189,6 +187,26 @@ function doMinify(map, opts, type) {
 
 /*
  * @author wangxin
+ * 压缩图片
+ * opts: 输出路径：文件路径
+ * retrun；
+ */
+function imin(map, opts, cb) {
+    var i, arr = [];
+    for (i in map) arr.push(map[i]);
+
+    function min(i) {
+        new Imagemin().src(arr[i]).dest(PATH.normalize(opts.image.outpath)).run(function () {
+            i += 1;
+            arr[i] ? min(i) : (cb && cb());
+        });
+    }
+
+    min(0);
+}
+
+/*
+ * @author wangxin
  * 初始化方法
  * opts: 配置参数
  * 详情参考 ../test/test.js ==> config
@@ -205,6 +223,28 @@ module.exports = function (config) {
         rjsMap = fileMap.rjs,
         cssMap = fileMap.css,
         jsMap = fileMap.js,
+        imageMap = fileMap.image,
+        watchTask = function () {
+            listener(opts, function (o, extname) {
+                switch (extname) {
+                    case 'rjs':
+                        doReplace(o, libraryMap, opts);
+                        break;
+                    case 'css':
+                        doMinify(o, opts, 'css');
+                        break;
+                    case 'js':
+                        doMinify(o, opts, 'js');
+                        break;
+                    default :
+                        if (opts.image.patterns.indexOf('.' + extname) != -1) {
+                            imin(o, opts);
+                        } else {
+                            trace.warn('watch task err');
+                        }
+                }
+            });
+        },
         task_run = function () {
             //对CSS文件的处理
             if (cssMap) {
@@ -217,23 +257,14 @@ module.exports = function (config) {
                 trace.ok('JS file processing tasks completed\n');
             }
 
-            //watch任务处理
-            if (opts.watch) {
-                listener(opts, function (o, extname) {
-                    switch (extname) {
-                        case 'rjs':
-                            doReplace(o, libraryMap, opts);
-                            break;
-                        case 'css':
-                            doMinify(o, opts, 'css');
-                            break;
-                        case 'js':
-                            doMinify(o, opts, 'js');
-                            break;
-                        default :
-                            trace.warn('watch task err');
-                    }
+            if (imageMap) {
+                imin(imageMap, opts, function () {
+                    trace.ok('image compress tasks completed\n');
+                    //watch任务处理
+                    opts.watch && watchTask();
                 });
+            }else{
+                opts.watch && watchTask();
             }
         };
 
@@ -246,7 +277,10 @@ module.exports = function (config) {
             //获取库文件的映射列表
             //object： fileName : filePath
             var libraryMap = getLibraryMap(PATH.resolve(opts.rjs.libraryPath) + PATH.sep, {});
-            doReplace(rjsMap, libraryMap || {}, opts, task_run);
+            doReplace(rjsMap, libraryMap || {}, opts, function () {
+                trace.ok('RJS file processing tasks completed\n');
+                task_run();
+            });
         } else {
             task_run();
         }
