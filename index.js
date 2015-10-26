@@ -148,7 +148,10 @@ function doReplace(rjsMap, libraryMap, opt, cb) {
 
             doBrowserify(path, charset, opt, i, replace);
         } else {
-            cb && cb();
+            if (cb) {
+                trace.ok('RJS file processing tasks completed\n');
+                cb();
+            }
         }
     };
 
@@ -166,14 +169,13 @@ function doReplace(rjsMap, libraryMap, opt, cb) {
 
 /*
  * @author wangxin
- * css压缩
+ * 文件压缩==>js、css文件
  * opts: 输出路径：文件路径
  * retrun；
  */
-
-function cleanCSS(cssMap, opts) {
-    for (var i in cssMap) {
-        var con = fs.readFileSync(cssMap[i]), charset;
+function doMinify(map, opts, type) {
+    for (var i in map) {
+        var con = fs.readFileSync(map[i]), charset;
         //这里不建议用gbk编码格式
         if (iconv.decode(con, 'gbk').indexOf('�') != -1) {
             charset = 'utf8';
@@ -181,7 +183,7 @@ function cleanCSS(cssMap, opts) {
             charset = 'gbk';
         }
 
-        outputHandle(iconv.decode(con, charset), cssMap[i], opts, 'css');
+        outputHandle(iconv.decode(con, charset), map[i], opts, type);
     }
 }
 
@@ -202,10 +204,17 @@ module.exports = function (config) {
     var fileMap = distrbute(opts),
         rjsMap = fileMap.rjs,
         cssMap = fileMap.css,
+        jsMap = fileMap.js,
         task_run = function () {
             //对CSS文件的处理
             if (cssMap) {
-                cleanCSS(cssMap, opts);
+                doMinify(cssMap, opts, 'css');
+                trace.ok('CSS file processing tasks completed\n');
+            }
+
+            if (jsMap) {
+                doMinify(jsMap, opts, 'js');
+                trace.ok('JS file processing tasks completed\n');
             }
 
             //watch任务处理
@@ -216,10 +225,13 @@ module.exports = function (config) {
                             doReplace(o, libraryMap, opts);
                             break;
                         case 'css':
-                            cleanCSS(o, opts);
+                            doMinify(o, opts, 'css');
+                            break;
+                        case 'js':
+                            doMinify(o, opts, 'js');
                             break;
                         default :
-                            trace.warn('err file change');
+                            trace.warn('watch task err');
                     }
                 });
             }
