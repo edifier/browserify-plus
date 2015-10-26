@@ -13,6 +13,8 @@
 	在*/browserify-plus/执行:npm test，*/browserify-plus/js/文件内查看编译后的代码
 	
 	增加-g参数以后，按照./test/config.bsp.js建立同名文件，全局执行browserify-plus命令
+	
+	增加了对js、css和image文件的压缩处理，详细配置参考下面的例子
 
 ## Options
 

@@ -64,5 +64,3 @@ var config = {
 };
 
 browserifyPlus(config);
-
-
