@@ -15,47 +15,7 @@ var distrbute = require('./lib/distrbute.js');
 var trace = require('./lib/trace.js');
 var outputHandle = require('./lib/output.js');
 var listener = require('./lib/listener');
-
-/*
- * @author wangxin
- * 深度复制，并统一path格式
- * return object;
- */
-function extendDeep(parent) {
-    var i,
-        toStr = Object.prototype.toString,
-        astr = '[object Array]',
-        child = arguments[1] || {};
-    for (i in parent) {
-        if (parent.hasOwnProperty(i)) {
-            if (typeof parent[i] === "object") {
-                child[i] = (toStr.call(parent[i]) === astr) ? [] : {};
-                extendDeep(parent[i], child[i]);
-            } else {
-                if (/path/gi.test(i) && !/^.+\/$/.test(parent[i])) parent[i] += '/';
-                child[i] = parent[i];
-            }
-        }
-    }
-    return child;
-}
-
-/*
- * @author wangxin
- * 获取对象长度
- * return number;
- */
-function getLength() {
-    var i = 0, o = arguments[0];
-    for (var j in o) {
-        if (typeof o[j] === 'object') {
-            i += getLength(o[j]);
-        } else {
-            (o.hasOwnProperty(j) && o[j]) && i++;
-        }
-    }
-    return i;
-}
+var util = require('./lib/util');
 
 /*
  * @author wangxin
@@ -196,7 +156,7 @@ function imin(map, opts, cb) {
     for (i in map) arr.push(map[i]);
 
     function min(i) {
-        new Imagemin().src(arr[i]).dest(PATH.normalize(opts.image.outpath)).run(function () {
+        new Imagemin().src(arr[i]).dest(PATH.normalize(opts.image.output.path)).run(function () {
             i += 1;
             arr[i] ? min(i) : (cb && cb());
         });
@@ -213,7 +173,7 @@ function imin(map, opts, cb) {
  */
 module.exports = function (config) {
 
-    var opts = extendDeep(config);
+    var opts = util.extendDeep(config);
 
     /*
      * 文件路径的初始化
@@ -263,7 +223,7 @@ module.exports = function (config) {
                     //watch任务处理
                     opts.watch && watchTask();
                 });
-            }else{
+            } else {
                 opts.watch && watchTask();
             }
         };
@@ -272,8 +232,8 @@ module.exports = function (config) {
      * 因为rjs任务为异步操作
      * 所以放在最先执行的位置上
      */
-    if (getLength(fileMap) !== 0) {
-        if (getLength(rjsMap) !== 0) {
+    if (util.getLength(fileMap) !== 0) {
+        if (util.getLength(rjsMap) !== 0) {
             //获取库文件的映射列表
             //object： fileName : filePath
             var libraryMap = getLibraryMap(PATH.resolve(opts.rjs.libraryPath) + PATH.sep, {});
