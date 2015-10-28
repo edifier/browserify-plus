@@ -14,7 +14,7 @@
 	
 	增加-g参数以后，按照./test/config.bsp.js建立同名文件，全局执行browserify-plus命令
 	
-	增加了对js、css和image文件的压缩处理，详细配置参考下面的例子
+	增加了对js、css和image文件的压缩处理，css文件支持@import引用，详细配置参考下面的例子
 
 ## Options
 
@@ -49,9 +49,7 @@
 				type: 'normal',
 				//是否压缩
 				compress: true
-			},
-			//引用的库文件路径
-			libraryPath: './core'
+			}
 		},
 		rjs: {
 			output: {
@@ -99,12 +97,24 @@
 	业务代码：
 ~~~ javascript
 	
-	//引用模块 from: ./test/src/rjs/test.js
+	//from: ./test/src/rjs/test.js
 	//clear为库文件路径内的clear.js文件
-	//库内文件不支持短命名形式引用
+	//库外模块文件不支持短命名形式引用
 	var clear = require('<%bsp:clear%>');
 	console.log(clear([1,null,'']));
 	
+~~~
+~~~ css
+	
+	/*from: ./test/src/css/t.css*/
+	/*css文件支持@import引用*/
+	@import url('./test_2.css');
+	@import url('../test.css');
+
+	div {
+    	height: 100px;
+	}
+
 ~~~
 
 ## License
