@@ -10,6 +10,8 @@ var iconv = require('iconv-lite');
 
 var browserify = require('browserify');
 var Imagemin = require('imagemin');
+var _ = require('lodash');
+
 
 var distrbute = require('./lib/distrbute.js');
 var trace = require('./lib/trace.js');
@@ -62,7 +64,7 @@ function doBrowserify(basePath, charset, config, index, cb) {
         fs.unlinkSync(basePath);
 
         if (err) {
-            trace.error(err);
+            trace.error(String(err).replace(/\.bsp/, ''));
         } else {
             //browserify编译完成，开始输出
             outputHandle(iconv.decode(code, charset), basePath, config, 'rjs');
