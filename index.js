@@ -21,6 +21,19 @@ var util = require('./lib/util');
 
 /*
  * @author wangxin
+ * 获取执行任务的参数
+ * file: 文件路径
+ * return object;
+ */
+function getArgs(file) {
+    var o = arguments[1] || {}, path = file.replace(/^(.+)(\..+)$/g, '$1.bsp$2');
+    !o[path] && (o[path] = file);
+    return o;
+}
+
+
+/*
+ * @author wangxin
  * 获取一个文件下所有文件路径
  * return object:
  * {
@@ -187,20 +200,20 @@ module.exports = function (config) {
         jsMap = fileMap.js,
         imageMap = fileMap.image,
         watchTask = function () {
-            listener(opts, function (o, extname) {
+            listener(opts, function (file, extname) {
                 switch (extname) {
                     case 'rjs':
-                        doReplace(o, libraryMap, opts);
+                        doReplace(getArgs(file, rjsMap), libraryMap, opts);
                         break;
                     case 'css':
-                        doMinify(o, opts, 'css');
+                        doMinify(getArgs(file, cssMap), opts, 'css');
                         break;
                     case 'js':
-                        doMinify(o, opts, 'js');
+                        doMinify(getArgs(file), opts, 'js');
                         break;
                     default :
                         if (opts.image.patterns.indexOf('.' + extname) != -1) {
-                            imin(o, opts);
+                            imin(getArgs(file), opts);
                         } else {
                             trace.warn('watch task err');
                         }
