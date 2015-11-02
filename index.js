@@ -10,8 +10,6 @@ var iconv = require('iconv-lite');
 
 var browserify = require('browserify');
 var Imagemin = require('imagemin');
-var _ = require('lodash');
-
 
 var distrbute = require('./lib/distrbute.js');
 var trace = require('./lib/trace.js');
