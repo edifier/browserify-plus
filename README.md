@@ -63,7 +63,9 @@
 				compress: true
 			},
 			//引用的库文件路径
-			libraryPath: './core'
+			libraryPath: './core',
+			//debug模式
+			debug:false
 		},
 		css: {
 			output: {
@@ -98,10 +100,16 @@
 ~~~ javascript
 	
 	//from: ./test/src/rjs/test.js
-	//clear为库文件路径内的clear.js文件
-	//库外模块文件不支持短命名形式引用
-	var clear = require('<%bsp:clear%>');
-	console.log(clear([1,null,'']));
+	//库文件方法的引用
+    var clear = require('clear.js');
+    //node模块的引用
+    var PATH = require('path');
+    //工程文件的引用
+    var t2 = require('./t2');
+
+    console.log(clear([1, null, '']));
+    console.log(PATH);
+    t2();
 	
 ~~~
 ~~~ css
