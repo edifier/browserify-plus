@@ -2,9 +2,13 @@
  * Created by wangxin on 15/10/3.
  */
 
-// 这是一段中文测试
-var clear = require('<%bsp:clear%>');
+//库文件方法的引用
+var clear = require('clear');
+//node模块的引用
 var PATH = require('path');
+//工程文件的引用
+var t2 = require('./t2');
 
-console.log(clear([1,null,'']));
+console.log(clear([1, null, '']));
 console.log(PATH);
+t2();

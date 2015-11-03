@@ -11,9 +11,9 @@ var iconv = require('iconv-lite');
 var browserify = require('browserify');
 var Imagemin = require('imagemin');
 
-var distrbute = require('./lib/distrbute.js');
-var trace = require('./lib/trace.js');
-var outputHandle = require('./lib/output.js');
+var distrbute = require('./lib/distrbute');
+var trace = require('./lib/trace');
+var outputHandle = require('./lib/output');
 var listener = require('./lib/listener');
 var util = require('./lib/util');
 
@@ -38,25 +38,18 @@ function getArgs(file) {
  *   fileName:filePath
  * }
  */
-function getLibraryMap(fileDir, that) {
-    var files = fs.readdirSync(fileDir);
+function getLibraryMap(fileDir) {
+    var files = fs.readdirSync(fileDir), arr = arguments[1] || [];
     files.forEach(function (fileName) {
         var baseDir = fileDir + fileName, lstat = fs.lstatSync(baseDir);
         if (lstat.isDirectory()) {
-            getLibraryMap(baseDir + PATH.sep, that);
+            getLibraryMap(baseDir + PATH.sep, arr);
         } else {
-            if (/^.+\.js$/.test(fileName)) {
-                var key = PATH.basename(fileName, '.js');
-                if (!that[key]) {
-                    //处理windows下路径(E:\a\b\c.js --> E:/a/b/c.js)
-                    that[key] = baseDir.replace(/\\/gi, '/');
-                } else {
-                    trace.error('some file in library : \n' + baseDir + '\n' + that[key]);
-                }
-            }
+            var file = PATH.dirname(baseDir);
+            arr.indexOf(file) === -1 && arr.push(PATH.normalize(file));
         }
     });
-    return that;
+    return arr;
 }
 
 /*
@@ -66,19 +59,18 @@ function getLibraryMap(fileDir, that) {
  * outputPath: 输出文件路径
  * return false;
  */
-function doBrowserify(basePath, charset, config, index, cb) {
-    var b = new browserify();
-    b.add(basePath);
+function doBrowserify(basePath, libraryMap, config, index, cb) {
+    var b = new browserify({
+        entries: basePath,
+        paths: libraryMap,
+        debug: config.rjs.debug || false
+    });
     b.bundle(function (err, code) {
-
-        //获取到文件内容后就删除过度文件
-        fs.unlinkSync(basePath);
-
         if (err) {
-            trace.error(String(err).replace(/\.bsp/, ''));
+            trace.error(String(err));
         } else {
             //browserify编译完成，开始输出
-            outputHandle(iconv.decode(code, charset), basePath, config, 'rjs');
+            outputHandle(iconv.decode(code, 'utf8'), basePath, config, 'rjs');
             cb && cb(index + 1);
         }
     });
@@ -91,39 +83,15 @@ function doBrowserify(basePath, charset, config, index, cb) {
  * libraryMap: 库文件map对象
  * return false;
  */
-function doReplace(rjsMap, libraryMap, opt, cb) {
+function walk(rjsMap, libraryMap, opt, cb) {
 
-    var arr = [], replace = function (i) {
+    var arr = [], go = function (i) {
         if (arr[i]) {
-            var path = arr[i], rjsPath = PATH.resolve(rjsMap[path]);
-
-            var con = fs.readFileSync(rjsMap[path]), charset;
-            //这里不建议用gbk编码格式
-            if (iconv.decode(con, 'gbk').indexOf('�') != -1) {
-                charset = 'utf8';
-            } else {
-                charset = 'gbk';
-            }
-
-            var content = iconv.decode(con, charset);
-            var text = content.replace(/<%bsp:(.+)%>/gi, function () {
-                var key = RegExp.$1, libraryFilePath = libraryMap[key];
-                if (!libraryFilePath) {
-                    //<%bsp:moduleName%>通过文件名，加载某一模块
-                    //当没有找到对应的库文件时，给出模块加载错误的提示
-                    trace.error('file : ' + rjsPath + '\nhas no module : ' + key);
-                } else {
-                    return libraryFilePath;
-                }
-            });
-
-            //准备做browserify编译
-            fs.writeFileSync(path, text);
-
-            doBrowserify(path, charset, opt, i, replace);
+            doBrowserify(arr[i], libraryMap, opt, i, go);
         } else {
             cb && cb();
         }
+        return false;
     };
 
     for (var i in rjsMap) {
@@ -131,11 +99,11 @@ function doReplace(rjsMap, libraryMap, opt, cb) {
             trace.error('file error');
             break;
         }
-        if (rjsMap.hasOwnProperty(i))  arr.push(i);
+        if (rjsMap.hasOwnProperty(i))  arr.push(rjsMap[i]);
     }
 
-    //开始替换
-    return replace(0);
+    //开始编译
+    return go(0);
 }
 
 /*
@@ -201,7 +169,7 @@ module.exports = function (config) {
             listener(opts, function (file, extname) {
                 switch (extname) {
                     case 'rjs':
-                        doReplace(getArgs(file, rjsMap), libraryMap, opts);
+                        walk(getArgs(file, rjsMap), libraryMap, opts);
                         break;
                     case 'css':
                         doMinify(getArgs(file, cssMap), opts, 'css');
@@ -248,9 +216,9 @@ module.exports = function (config) {
     if (util.getLength(fileMap) !== 0) {
         if (util.getLength(rjsMap) !== 0) {
             //获取库文件的映射列表
-            //object： fileName : filePath
-            var libraryMap = getLibraryMap(PATH.resolve(opts.rjs.libraryPath) + PATH.sep, {});
-            doReplace(rjsMap, libraryMap || {}, opts, function () {
+            //arr: ['dirname']
+            var libraryMap = getLibraryMap(PATH.resolve(opts.rjs.libraryPath) + PATH.sep, [PATH.resolve(opts.inputPath) + PATH.sep]);
+            walk(rjsMap, libraryMap, opts, function () {
                 trace.ok('RJS file processing tasks completed\n');
                 task_run();
             });
