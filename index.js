@@ -24,8 +24,12 @@ var util = require('./lib/util');
  * return object;
  */
 function getArgs(file) {
-    var o = arguments[1] || {}, path = file.replace(/^(.+)(\..+)$/g, '$1.bsp$2');
-    !o[path] && (o[path] = file);
+    var o = arguments[1] || {}, type = arguments[2] || null, path = file.replace(/^(.+)(\..+)$/g, '$1.bsp$2');
+    if (!type) {
+        !o[path] && (o[path] = file);
+    } else if (type === 'remove') {
+        delete o[path];
+    }
     return o;
 }
 
@@ -71,8 +75,8 @@ function doBrowserify(basePath, libraryMap, config, index, cb) {
         } else {
             //browserify编译完成，开始输出
             outputHandle(iconv.decode(code, 'utf8'), basePath, config, 'rjs');
-            cb && cb(index + 1);
         }
+        cb && cb(index + 1);
     });
 }
 
@@ -166,13 +170,15 @@ module.exports = function (config) {
         jsMap = fileMap.js,
         imageMap = fileMap.image,
         watchTask = function () {
-            listener(opts, function (file, extname) {
+            listener(opts, function (file, extname, type) {
                 switch (extname) {
                     case 'rjs':
-                        walk(getArgs(file, rjsMap), libraryMap, opts);
+                        console.log(type);
+                        walk(getArgs(file, rjsMap, type), libraryMap, opts);
+                        console.log(rjsMap);
                         break;
                     case 'css':
-                        doMinify(getArgs(file, cssMap), opts, 'css');
+                        doMinify(getArgs(file, cssMap, type), opts, 'css');
                         break;
                     case 'js':
                         doMinify(getArgs(file), opts, 'js');
@@ -180,8 +186,6 @@ module.exports = function (config) {
                     default :
                         if (opts.image.patterns.indexOf('.' + extname) != -1) {
                             imin(getArgs(file), opts);
-                        } else {
-                            trace.warn('watch task err');
                         }
                 }
             });
