@@ -24,7 +24,7 @@ var util = require('./lib/util');
  * return object;
  */
 function getArgs(file) {
-    var o = arguments[1] || {}, type = arguments[2] || null, path = file.replace(/^(.+)(\..+)$/g, '$1.bsp$2');
+    var o = arguments[1] || {}, type = arguments[2] || null, path = PATH.resolve(file);
     if (!type) {
         !o[path] && (o[path] = file);
     } else if (type === 'remove') {
@@ -173,9 +173,7 @@ module.exports = function (config) {
             listener(opts, function (file, extname, type) {
                 switch (extname) {
                     case 'rjs':
-                        console.log(type);
                         walk(getArgs(file, rjsMap, type), libraryMap, opts);
-                        console.log(rjsMap);
                         break;
                     case 'css':
                         doMinify(getArgs(file, cssMap, type), opts, 'css');
