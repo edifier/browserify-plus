@@ -37,10 +37,7 @@ function getArgs(file) {
 /*
  * @author wangxin
  * 获取一个文件下所有文件路径
- * return object:
- * {
- *   fileName:filePath
- * }
+ * return arr ['dirPath','dirPath',...]
  */
 function getLibraryMap(fileDir) {
     var files = fs.readdirSync(fileDir), arr = arguments[1] || [];
@@ -61,7 +58,7 @@ function getLibraryMap(fileDir) {
  * 进行browserify编译
  * content: 文件内容，string;
  * outputPath: 输出文件路径
- * return false;
+ * return;
  */
 function doBrowserify(basePath, libraryMap, config, index, cb) {
     var b = new browserify({
