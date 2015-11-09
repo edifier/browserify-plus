@@ -24,11 +24,16 @@ var util = require('./lib/util');
  * return object;
  */
 function getArgs(file) {
-    var o = arguments[1] || {}, type = arguments[2] || null, path = PATH.resolve(file);
-    if (!type) {
-        !o[path] && (o[path] = file);
-    } else if (type === 'remove') {
-        delete o[path];
+    var o = arguments[1] || {},
+        type = arguments[2] || null,
+        i = 0, len = file.length;
+    for (; i < len; i++) {
+        var path = PATH.resolve(file[i]);
+        if (!type) {
+            !o[path] && (o[path] = file[i]);
+        } else if (type === 'remove') {
+            delete o[path];
+        }
     }
     return o;
 }
@@ -72,6 +77,7 @@ function doBrowserify(basePath, libraryMap, config, index, cb) {
         } else {
             //browserify编译完成，开始输出
             outputHandle(iconv.decode(code, 'utf8'), basePath, config, 'rjs');
+            code = null;
         }
         cb && cb(index + 1);
     });
@@ -124,6 +130,7 @@ function doMinify(map, opts, type) {
         }
 
         outputHandle(iconv.decode(con, charset), map[i], opts, type);
+        con = null;
     }
 }
 
@@ -177,6 +184,8 @@ module.exports = function (config) {
                         break;
                     case 'js':
                         doMinify(getArgs(file), opts, 'js');
+                        break;
+                    case '' :
                         break;
                     default :
                         if (opts.image.patterns.indexOf('.' + extname) != -1) {
