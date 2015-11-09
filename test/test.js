@@ -19,9 +19,7 @@ var config = {
             type: 'normal',
             //是否压缩
             compress: true
-        },
-        //引用的库文件路径
-        libraryPath: './core'
+        }
     },
     rjs: {
         output: {
