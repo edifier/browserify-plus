@@ -27,6 +27,8 @@ function getArgs(file) {
     var o = arguments[1] || {},
         type = arguments[2] || null,
         i = 0, len = file.length;
+
+    if (len == 0) return o;
     for (; i < len; i++) {
         var path = PATH.resolve(file[i]);
         if (!type) {
@@ -164,9 +166,8 @@ module.exports = function (config) {
 
     var opts = util.extendDeep(config);
 
-    /*
+    /**
      * 文件路径的初始化
-     *
      */
     var fileMap = distrbute(opts),
         rjsMap = fileMap.rjs,
@@ -177,7 +178,17 @@ module.exports = function (config) {
             listener(opts, function (file, extname, type) {
                 switch (extname) {
                     case 'rjs':
-                        walk(getArgs(file, rjsMap, type), libraryMap, opts);
+                        if (!type || type == 'remove') {
+                            walk(getArgs(file, rjsMap, type), libraryMap, opts);
+                        } else {
+                            file = PATH.normalize(PATH.resolve(file));
+                            if (type === 'resetLibA') {
+                                libraryMap.indexOf(file) === -1 && libraryMap.push(file);
+                            }
+                            else if (type === 'resetLibD') {
+                                libraryMap = util.removeEle.call(libraryMap, file);
+                            }
+                        }
                         break;
                     case 'css':
                         doMinify(getArgs(file, cssMap, type), opts, 'css');
