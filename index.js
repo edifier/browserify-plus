@@ -178,8 +178,10 @@ module.exports = function (config) {
             listener(opts, function (file, extname, type) {
                 switch (extname) {
                     case 'rjs':
-                        if (!type || type == 'remove') {
+                        if (!type) {
                             walk(getArgs(file, rjsMap, type), libraryMap, opts);
+                        } else if (type == 'remove') {
+                            rjsMap = getArgs(file, rjsMap, type);
                         } else {
                             file = PATH.normalize(PATH.resolve(file));
                             if (type === 'resetLibA') {
@@ -191,7 +193,11 @@ module.exports = function (config) {
                         }
                         break;
                     case 'css':
-                        doMinify(getArgs(file, cssMap, type), opts, 'css');
+                        if (!type) {
+                            doMinify(getArgs(file, cssMap, type), opts, 'css');
+                        } else if (type == 'remove') {
+                            cssMap = getArgs(file, cssMap, type);
+                        }
                         break;
                     case 'js':
                         doMinify(getArgs(file), opts, 'js');
