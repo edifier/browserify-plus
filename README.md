@@ -26,7 +26,7 @@
 		`normal`: 单独文件输出  `deep`: 包含路径输出
 		
 	* `output.compress` -- boolean 是否压缩
-	* `libraryPath` -- 库文件路径，被引用时可以使用<%bsp:file_name%>方式引入
+	* `libraryPath` -- 库文件路径
 	* `watch` -- 是否同步更新，`interval`为轮询时常
 
 ## Example
