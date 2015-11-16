@@ -75,13 +75,19 @@ function doBrowserify(basePath, libraryMap, config, index, cb) {
     });
     b.bundle(function (err, code) {
         if (err) {
+            module.timer && clearTimeout(module.timer);
+            module.timer = setTimeout(function () {
+                module.timer && clearTimeout(module.timer);
+                module.timer = null;
+                cb && cb(index + 1);
+            }, 50);
             trace.error(String(err));
         } else {
             //browserify编译完成，开始输出
             outputHandle(iconv.decode(code, 'utf8'), basePath, config, 'rjs');
             code = null;
+            cb && cb(index + 1);
         }
-        cb && cb(index + 1);
     });
 }
 
