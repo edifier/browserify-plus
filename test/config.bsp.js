@@ -40,9 +40,7 @@ module.exports = {
             banner: '/*build at <%time%>*/\n',
             //输出文件路径
             path: '../css',
-            type: 'normal',
-            //是否压缩
-            compress: true
+            type: 'normal'
         }
     },
     image: {

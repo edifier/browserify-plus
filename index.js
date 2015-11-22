@@ -149,17 +149,16 @@ function doMinify(map, opts, type) {
  * retrun；
  */
 function imin(map, opts, cb) {
-    var i, arr = [];
-    for (i in map) arr.push(map[i]);
+    var arr = [];
+    for (var i in map) arr.push(map[i]);
 
-    function min(i) {
-        new Imagemin().src(arr[i]).dest(PATH.normalize(opts.image.output.path)).run(function () {
-            i += 1;
-            arr[i] ? min(i) : (cb && cb());
+    trace.load('image compressed, waiting...');
+
+    ~function () {
+        new Imagemin().src(arr).dest(PATH.normalize(opts.image.output.path)).run(function () {
+            cb && cb()
         });
-    }
-
-    min(0);
+    }();
 }
 
 /*
