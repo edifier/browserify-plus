@@ -239,6 +239,8 @@ module.exports = function (config) {
             }
         };
 
+    trace.load('\ntask run, go...\n');
+
     /*
      * 因为rjs任务为异步操作
      * 所以放在最先执行的位置上
