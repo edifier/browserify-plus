@@ -31,9 +31,9 @@ function getArgs(file) {
     if (len == 0) return o;
     for (; i < len; i++) {
         var path = PATH.resolve(file[i]);
-        if (!type) {
+        if (!type || type == 'built') {
             !o[path] && (o[path] = file[i]);
-        } else if (type === 'remove') {
+        } else if (type === 'removed') {
             delete o[path];
         }
     }
@@ -180,39 +180,66 @@ module.exports = function (config) {
         jsMap = fileMap.js,
         imageMap = fileMap.image,
         watchTask = function () {
+
+            var cache = [], running = false;
+
             listener(opts, function (file, extname, type) {
-                switch (extname) {
-                    case 'rjs':
-                        if (!type) {
-                            walk(getArgs(file, rjsMap, type), libraryMap, opts);
-                        } else if (type == 'remove') {
-                            rjsMap = getArgs(file, rjsMap, type);
-                        } else {
-                            file = PATH.normalize(PATH.resolve(file));
-                            if (type === 'resetLibA') {
-                                libraryMap.indexOf(file) === -1 && libraryMap.push(file);
+
+                function go(file, extname, type) {
+
+                    function next() {
+                        if (cache.length != 0) {
+                            go.apply(this, cache.shift());
+                        }else{
+                            running = false;
+                        }
+                    }
+
+                    switch (extname) {
+                        case 'rjs':
+                            if (!type) {
+                                walk(getArgs(file, rjsMap, type), libraryMap, opts, function () {
+                                    trace.log(file[0] + ' has been changed at ' + new Date());
+                                    next();
+                                });
+                            } else if (type == 'built' || type == 'removed') {
+                                rjsMap = getArgs(file, rjsMap, type);
+                                util.log(file, type);
+                                next();
+                            } else {
+                                file = PATH.normalize(PATH.resolve(file));
+                                if (type === 'resetLibA') {
+                                    libraryMap.indexOf(file) === -1 && libraryMap.push(file);
+                                }
+                                else if (type === 'resetLibD') {
+                                    libraryMap = util.removeEle.call(libraryMap, file);
+                                }
                             }
-                            else if (type === 'resetLibD') {
-                                libraryMap = util.removeEle.call(libraryMap, file);
+                            break;
+                        case 'css':
+                            if (!type) {
+                                doMinify(getArgs(file, cssMap, type), opts, 'css');
+                            } else if (type == 'remove') {
+                                cssMap = getArgs(file, cssMap, type);
                             }
-                        }
-                        break;
-                    case 'css':
-                        if (!type) {
-                            doMinify(getArgs(file, cssMap, type), opts, 'css');
-                        } else if (type == 'remove') {
-                            cssMap = getArgs(file, cssMap, type);
-                        }
-                        break;
-                    case 'js':
-                        doMinify(getArgs(file), opts, 'js');
-                        break;
-                    case '' :
-                        break;
-                    default :
-                        if (opts.image.patterns.indexOf('.' + extname) != -1) {
-                            imin(getArgs(file), opts);
-                        }
+                            break;
+                        case 'js':
+                            doMinify(getArgs(file), opts, 'js');
+                            break;
+                        case '' :
+                            break;
+                        default :
+                            if (opts.image.patterns.indexOf('.' + extname) != -1) {
+                                imin(getArgs(file), opts);
+                            }
+                    }
+                }
+
+                if (!running) {
+                    running = true;
+                    go(file, extname, type);
+                } else {
+                    cache.push(arguments);
                 }
             });
         },
