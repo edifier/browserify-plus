@@ -220,13 +220,16 @@ module.exports = function (config) {
                             if (!type) {
                                 doMinify(getArgs(file, cssMap, type), opts, 'css');
                                 trace.log(file[0] + ' has been changed at ' + new Date());
-                            } else if (type == 'remove') {
+                            } else if (type == 'removed' || type == 'built') {
                                 cssMap = getArgs(file, cssMap, type);
+                                util.log(file, type);
                             }
+                            next();
                             break;
                         case 'js':
                             doMinify(getArgs(file), opts, 'js');
                             trace.log(file[0] + ' has been changed at ' + new Date());
+                            next();
                             break;
                         case '' :
                             break;
@@ -235,11 +238,12 @@ module.exports = function (config) {
                                 imin(getArgs(file), opts);
                                 trace.log(file[0] + ' has been changed at ' + new Date());
                             }
+                            next();
                     }
                 }
 
                 if (!running) {
-                    if(extname == 'rjs') running = true;
+                    running = true;
                     go(file, extname, type);
                 } else {
                     cache.push(arguments);
