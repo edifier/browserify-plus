@@ -227,8 +227,13 @@ module.exports = function (config) {
                             next();
                             break;
                         case 'js':
-                            doMinify(getArgs(file), opts, 'js');
-                            trace.log(file[0] + ' has been changed at ' + new Date());
+                            if(!type){
+                                doMinify(getArgs(file), opts, 'js');
+                                trace.log(file[0] + ' has been changed at ' + new Date());
+                            }else if (type == 'removed' || type == 'built') {
+                                jsMap = getArgs(file, jsMap, type);
+                                util.log(file, type);
+                            }
                             next();
                             break;
                         case '' :
