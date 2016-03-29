@@ -219,24 +219,27 @@ module.exports = function (config) {
                         case 'css':
                             if (!type) {
                                 doMinify(getArgs(file, cssMap, type), opts, 'css');
+                                trace.log(file[0] + ' has been changed at ' + new Date());
                             } else if (type == 'remove') {
                                 cssMap = getArgs(file, cssMap, type);
                             }
                             break;
                         case 'js':
                             doMinify(getArgs(file), opts, 'js');
+                            trace.log(file[0] + ' has been changed at ' + new Date());
                             break;
                         case '' :
                             break;
                         default :
                             if (opts.image.patterns.indexOf('.' + extname) != -1) {
                                 imin(getArgs(file), opts);
+                                trace.log(file[0] + ' has been changed at ' + new Date());
                             }
                     }
                 }
 
                 if (!running) {
-                    running = true;
+                    if(extname == 'rjs') running = true;
                     go(file, extname, type);
                 } else {
                     cache.push(arguments);
