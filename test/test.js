@@ -47,6 +47,13 @@ var config = {
             type: 'normal'
         }
     },
+    scss: {
+        output:{
+            path : 'css/',
+            type : 'normal',
+            compress: true
+        }
+    },
     image: {
         output: {
             //输出文件路径

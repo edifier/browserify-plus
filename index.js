@@ -179,6 +179,7 @@ module.exports = function (config) {
         cssMap = fileMap.css,
         jsMap = fileMap.js,
         imageMap = fileMap.image,
+        scssMap = fileMap.scss,
         watchTask = function () {
 
             var cache = [], running = false;
@@ -190,19 +191,23 @@ module.exports = function (config) {
                     function next() {
                         if (cache.length != 0) {
                             go.apply(this, cache.shift());
-                        }else{
+                        } else {
                             running = false;
                         }
                     }
 
                     switch (extname) {
                         case 'rjs':
-                            if (!type) {
+                            if (!type || type == 'built') {
                                 walk(getArgs(file, rjsMap, type), libraryMap, opts, function () {
-                                    trace.log(file[0] + ' has been changed at ' + new Date());
+                                    if (type == 'built') {
+                                        util.log(file, type);
+                                    } else {
+                                        trace.log(file[0] + ' has been changed at ' + new Date());
+                                    }
                                     next();
                                 });
-                            } else if (type == 'built' || type == 'removed') {
+                            } else if (type == 'removed') {
                                 rjsMap = getArgs(file, rjsMap, type);
                                 util.log(file, type);
                                 next();
@@ -227,14 +232,21 @@ module.exports = function (config) {
                             next();
                             break;
                         case 'js':
-                            if(!type){
+                            if (!type) {
                                 doMinify(getArgs(file), opts, 'js');
                                 trace.log(file[0] + ' has been changed at ' + new Date());
-                            }else if (type == 'removed' || type == 'built') {
+                            } else if (type == 'removed' || type == 'built') {
                                 jsMap = getArgs(file, jsMap, type);
                                 util.log(file, type);
                             }
                             next();
+                            break;
+                        case 'scss':
+                            if (!type) {
+                                doMinify(getArgs(file, scssMap, type), opts, 'scss');
+                            } else if (type == 'remove') {
+                                scssMap = getArgs(file, scssMap, type);
+                            }
                             break;
                         case '' :
                             break;
@@ -260,6 +272,11 @@ module.exports = function (config) {
             if (cssMap) {
                 doMinify(cssMap, opts, 'css');
                 trace.ok('CSS file processing tasks completed\n');
+            }
+
+            if (scssMap) {
+                doMinify(scssMap, opts, 'scss');
+                trace.ok('scss file processing tasks completed\n');
             }
 
             if (jsMap) {
