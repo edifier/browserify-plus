@@ -244,9 +244,12 @@ module.exports = function (config) {
                         case 'scss':
                             if (!type) {
                                 doMinify(getArgs(file, scssMap, type), opts, 'scss');
-                            } else if (type == 'remove') {
+                                trace.log(file[0] + ' has been changed at ' + new Date());
+                            } else if (type == 'remove' || type == 'built') {
                                 scssMap = getArgs(file, scssMap, type);
+                                util.log(file, type);
                             }
+                            next();
                             break;
                         case '' :
                             break;
