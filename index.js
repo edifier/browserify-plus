@@ -203,7 +203,7 @@ module.exports = function (config) {
                                     if (type == 'built') {
                                         util.log(file, type);
                                     } else {
-                                        trace.log(file[0] + ' has been changed at ' + new Date());
+                                        file[0] && trace.log(file[0] + ' has been changed at ' + new Date());
                                     }
                                     next();
                                 });
