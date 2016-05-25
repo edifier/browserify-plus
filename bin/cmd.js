@@ -22,7 +22,7 @@ function getFilePath(filePath, file, that) {
             return;
         }
         if (lstat.isDirectory()) {
-            if (PATH.basename(baseDir).replace(/\..+$/, '') == '')return;
+            if (PATH.basename(baseDir).replace(/\..+$/, '') == '') return;
             getFilePath(baseDir + PATH.sep, file, that);
         } else if (lstat.isFile() && fileName === file) {
             that.path = baseDir;
@@ -39,12 +39,16 @@ if (/(v|version)/i.test(args)) {
     return trace.log(require('../package.json').version);
 }
 
+if (args && /(u|upload)/i.test(args)) {
+    return require('../lib/upload.js')(process.argv[3]);
+}
+
 //配置文件当做参数传值的校验
 if (args && !/.+\.bsp\.js$/.test(args)) {
     return trace.warn('configuration file named *.bsp.js');
 }
 
-var fileMap = args ? {path: util.relativePath(process.cwd(), args)} : getFilePath(process.cwd() + PATH.sep, 'config.bsp.js', {});
+var fileMap = args ? {path: util.relative(process.cwd(), args)} : getFilePath(process.cwd() + PATH.sep, 'config.bsp.js', {});
 
 if (fileMap && fileMap.path) {
     try {
@@ -54,7 +58,7 @@ if (fileMap && fileMap.path) {
         process.exit(1);
     }
 
-    browserifyPlus(util.extendDeep(config,{},dirName));
+    browserifyPlus(util.extendDeep(config, {}, dirName));
 } else {
     return trace.error('no configuration file, please edit it');
 }

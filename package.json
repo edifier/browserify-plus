@@ -17,6 +17,7 @@
     "imagemin": "^3.2.2",
     "uglify-js": "^2.4.24",
     "cross-spawn":"latest",
+	"ssh2":"latest",
     "watch": "^0.16.0"
   },
   "devDependencies": {},
