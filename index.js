@@ -31,7 +31,7 @@ function getArgs(file) {
     if (len == 0) return o;
     for (; i < len; i++) {
         var path = PATH.resolve(file[i]);
-        if (!type || type == 'built') {
+        if (type == 'built' || type == 'change') {
             !o[path] && (o[path] = file[i]);
         } else if (type === 'removed') {
             delete o[path];
@@ -171,6 +171,8 @@ module.exports = function (config) {
 
     var opts = util.extendDeep(config);
 
+    var libraryMap = [];
+
     /**
      * 文件路径的初始化
      */
@@ -198,12 +200,14 @@ module.exports = function (config) {
 
                     switch (extname) {
                         case 'rjs':
-                            if (!type || type == 'built') {
-                                walk(getArgs(file, rjsMap, type), libraryMap, opts, function () {
+                            if (!type || type == 'change' || type == 'built') {
+                                walk(type ? getArgs(file, {}, type) : rjsMap, libraryMap, opts, function () {
                                     if (type == 'built') {
                                         util.log(file, type);
+                                    } else if (!type) {
+                                        trace.log('mod file: ' + file + ' has been changed at ' + new Date());
                                     } else {
-                                        file[0] && trace.log(file[0] + ' has been changed at ' + new Date());
+                                        trace.log(file[0] + ' has been changed at ' + new Date());
                                     }
                                     next();
                                 });
@@ -307,8 +311,9 @@ module.exports = function (config) {
     if (util.getLength(fileMap) !== 0) {
         if (util.getLength(rjsMap) !== 0) {
             //获取库文件的映射列表
-            //arr: ['dirname']
-            var libraryMap = getLibraryMap(PATH.resolve(opts.rjs.libraryPath) + PATH.sep, [PATH.resolve(opts.inputPath) + PATH.sep]);
+            if (opts.rjs && opts.rjs.libraryPath) {
+                libraryMap = getLibraryMap(PATH.resolve(opts.rjs.libraryPath) + PATH.sep, [PATH.resolve(opts.inputPath) + PATH.sep]);
+            }
             walk(rjsMap, libraryMap, opts, function () {
                 trace.ok('RJS file processing tasks completed\n');
                 task_run();
